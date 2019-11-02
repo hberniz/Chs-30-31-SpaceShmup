@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy_3 : Enemy { // Enemy_3 extends Enemy
+public class Enemy_3 : Enemy
+{ // Enemy_3 extends Enemy
     // Enemy_3 will move following a Bezier curve, which is a linear
     // interpolation between more than two points.
     [Header("Set in Inspector: Enemy_3")]

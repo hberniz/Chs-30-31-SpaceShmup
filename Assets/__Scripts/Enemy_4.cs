@@ -21,7 +21,8 @@ public class Part
     public Material mat; // The Material to show damage
 }
 
-public class Enemy_4 : Enemy {
+public class Enemy_4 : Enemy
+{
 
     [Header("Set in Inspector: Enemy_4")]
     public Part[] parts; // The array of ship Parts
@@ -84,7 +85,7 @@ public class Enemy_4 : Enemy {
     {
         foreach (Part prt in parts)
         {
-            if(prt.name == n)
+            if (prt.name == n)
             {
                 return (prt);
             }
@@ -93,9 +94,9 @@ public class Enemy_4 : Enemy {
     }
     Part FindPart(GameObject go)
     {
-        foreach(Part prt in parts)
+        foreach (Part prt in parts)
         {
-            if(prt.go == go)
+            if (prt.go == go)
             {
                 return (prt);
             }
@@ -149,7 +150,7 @@ public class Enemy_4 : Enemy {
                 // Hurt this Enemy
                 GameObject goHit = coll.contacts[0].thisCollider.gameObject;
                 Part prtHit = FindPart(goHit);
-                if(prtHit == null) // If prtHit wasn't found...
+                if (prtHit == null) // If prtHit wasn't found...
                 {
                     goHit = coll.contacts[0].otherCollider.gameObject;
                     prtHit = FindPart(goHit);
@@ -157,7 +158,7 @@ public class Enemy_4 : Enemy {
                 // Check whether this part is still protected
                 if (prtHit.protectedBy != null)
                 {
-                    foreach(string s in prtHit.protectedBy)
+                    foreach (string s in prtHit.protectedBy)
                     {
                         // If one of the protecting parts hasn't been destroyed...
                         if (!Destroyed(s))
@@ -174,7 +175,7 @@ public class Enemy_4 : Enemy {
                 prtHit.health -= Main.GetWeaponDefinition(p.type).damageOnHit;
                 // Show damage on the part
                 ShowLocalizedDamage(prtHit.mat);
-                if(prtHit.health <= 0)
+                if (prtHit.health <= 0)
                 {
                     // Instead of destroying this enemy, disable the damaged part
                     prtHit.go.SetActive(false);

@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour {
+public class Enemy : MonoBehaviour
+{
 
     [Header("Set in Inspector: Enemy")]
     public float speed = 10f; // The speed in m/s
@@ -19,48 +20,19 @@ public class Enemy : MonoBehaviour {
     public float damageDoneTime; // Time to stop showing damage
     public bool notifiedOfDestruction = false; // Will be used later
 
-    private BoundsCheck bndCheck;
+    protected BoundsCheck bndCheck;
 
     private void Awake()
     {
-        InvokeRepeating("CheckOffscreen", 0f, 2f);
         bndCheck = GetComponent<BoundsCheck>();
         // Get materials and colors for this GameObject and its children
         materials = Utils.GetAllMaterials(gameObject);
         originalColors = new Color[materials.Length];
-        for (int i=0; i<materials.Length; i++)
+        for (int i = 0; i < materials.Length; i++)
         {
             originalColors[i] = materials[i].color;
         }
     }
-
-    void CheckOffscreen()
-    {
-        // If bounds are still their default value...
-        if (bounds.size == Vector3.zero)
-        {
-            // then set them
-            bounds = Utils.CombineBoundsOfChildren(this.gameObject);
-            // Also find the diff between bounds.center & transform.position
-            boundsCenterOffset = bounds.center - transform.position;
-        }
-        // Every time, update the bounds to the current position
-        bounds.center = transform.position + boundsCenterOffset;
-        // Check to see whether the bounds are completely offscreen
-        Vector3 off = Utils.ScreenBoundsCheck(bounds, BoundsTest.offScreen);
-        if (off != Vector3.zero)
-        {
-            // If this enemy has gone off the bottom edge of the screen
-            if (off.y < 0)
-            {
-                // then destroy it
-                Destroy(this.gameObject);
-            }
-        }
-    }
-
-
-
 
     // This is a property: A method that acts like a field
     public Vector3 pos
@@ -79,7 +51,7 @@ public class Enemy : MonoBehaviour {
     {
         Move();
 
-        if(showingDamage && Time.time > damageDoneTime)
+        if (showingDamage && Time.time > damageDoneTime)
         {
             UnShowDamage();
         }
@@ -116,7 +88,7 @@ public class Enemy : MonoBehaviour {
                 ShowDamage();
                 // Get the damage amount from the Main WEAP_DICT
                 health -= Main.GetWeaponDefinition(p.type).damageOnHit;
-                if(health <= 0)
+                if (health <= 0)
                 {
                     // Tell the Main singleton that this ship was destroyed
                     if (!notifiedOfDestruction)
@@ -148,7 +120,7 @@ public class Enemy : MonoBehaviour {
 
     void UnShowDamage()
     {
-        for (int i=0; i<materials.Length; i++)
+        for (int i = 0; i < materials.Length; i++)
         {
             materials[i].color = originalColors[i];
         }

@@ -36,7 +36,8 @@ public class WeaponDefinition
     public float delayBetweenShots = 0;
     public float velocity = 20; // Speed of projectiles
 }
-public class Weapon : MonoBehaviour {
+public class Weapon : MonoBehaviour
+{
     static public Transform PROJECTILE_ANCHOR;
 
     [Header("Set Dynamically")]
@@ -46,22 +47,17 @@ public class Weapon : MonoBehaviour {
     public GameObject collar;
     public float lastShotTime; // Time last shot was fired
     private Renderer collarRend;
-    private float lastShot;
 
-    void Awake()
+    private void Start()
     {
         collar = transform.Find("Collar").gameObject;
         collarRend = collar.GetComponent<Renderer>();
-    }
 
-
-        private void Start()
-        { 
         // Call SetType() for the default _type of WeaponType.none
         SetType(_type);
 
         // Dynamically create an anchor for all Projectiles
-        if(PROJECTILE_ANCHOR == null)
+        if (PROJECTILE_ANCHOR == null)
         {
             GameObject go = new GameObject("_ProjectileAnchor");
             PROJECTILE_ANCHOR = go.transform;
@@ -69,7 +65,7 @@ public class Weapon : MonoBehaviour {
 
         // Find the fireDelegate of the root GameObject
         GameObject rootGO = transform.root.gameObject;
-        if(rootGO.GetComponent<Hero>() != null)
+        if (rootGO.GetComponent<Hero>() != null)
         {
             rootGO.GetComponent<Hero>().fireDelegate += Fire;
         }
@@ -107,36 +103,42 @@ public class Weapon : MonoBehaviour {
     public void Fire()
     {
         //TODO: Implement Fire
-        // If this.gameObject is inactive, return
         if (!gameObject.activeInHierarchy) return;
-        // If it hasn't been enough time between shots, return
-        if (Time.time - lastShot < def.delayBetweenShots)
+
+        if (Time.time - lastShotTime < def.delayBetweenShots)
         {
             return;
         }
         Projectile p;
+        Vector3 vel = Vector3.up * def.velocity;
+        if (transform.up.y < 0)
+        {
+            vel.y = -vel.y;
+        }
         switch (type)
         {
             case WeaponType.blaster:
                 p = MakeProjectile();
-                p.GetComponent<Rigidbody>().velocity = Vector3.up * def.velocity;
+                p.rigid.velocity = vel;
                 break;
+
             case WeaponType.spread:
                 p = MakeProjectile();
-                p.GetComponent<Rigidbody>().velocity = Vector3.up * def.velocity;
+                p.rigid.velocity = vel;
                 p = MakeProjectile();
-                p.GetComponent<Rigidbody>().velocity = new Vector3(-.2f, 0.9f, 0) * def.velocity;
+                p.transform.rotation = Quaternion.AngleAxis(10, Vector3.back);
+                p.rigid.velocity = p.transform.rotation * vel;
                 p = MakeProjectile();
-                p.GetComponent<Rigidbody>().velocity = new Vector3(.2f, 0.9f, 0) * def.velocity;
+                p.transform.rotation = Quaternion.AngleAxis(-10, Vector3.back);
+                p.rigid.velocity = p.transform.rotation * vel;
                 break;
         }
-
     }
 
     public Projectile MakeProjectile()
     {
         //TODO: Implement MakeProjectile
-        GameObject go = Instantiate(def.projectilePrefab) as GameObject;
+        GameObject go = Instantiate<GameObject>(def.projectilePrefab);
         if (transform.parent.gameObject.tag == "Hero")
         {
             go.tag = "ProjectileHero";
@@ -148,12 +150,10 @@ public class Weapon : MonoBehaviour {
             go.layer = LayerMask.NameToLayer("ProjectileEnemy");
         }
         go.transform.position = collar.transform.position;
-        go.transform.parent = PROJECTILE_ANCHOR;
+        go.transform.SetParent(PROJECTILE_ANCHOR, true);
         Projectile p = go.GetComponent<Projectile>();
         p.type = type;
-        lastShot = Time.time;
+        lastShotTime = Time.time;
         return (p);
-
-
     }
 }

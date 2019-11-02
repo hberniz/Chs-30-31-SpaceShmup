@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Hero : MonoBehaviour {
+public class Hero : MonoBehaviour
+{
     static public Hero S; // Singleton
-    private Bounds bounds;
+
     [Header("Set in Inspector")]
     // These fields control the movement of the ship
     public float speed = 30;
@@ -19,30 +20,18 @@ public class Hero : MonoBehaviour {
     [SerializeField]
     public float _shieldLevel = 1;
 
-
-// This variable holds a reference to the last triggering GameObject
-private GameObject lastTriggerGo = null;
+    // This variable holds a reference to the last triggering GameObject
+    private GameObject lastTriggerGo = null;
 
 
     //TODO: Add function delegate declaration
-
-    // Declare a new delegate type WeaponFireDelegate
     public delegate void WeaponFireDelegate();
-    // Create a WeaponFireDelegate field named fireDelegate.
+
     public WeaponFireDelegate fireDelegate;
 
-    void Awake()
-    {
-        S = this; // Set the Singleton
-        bounds = Utils.CombineBoundsOfChildren(this.gameObject);
-      
-    }
 
     void Start()
     {
-        // Reset the weapons to start _Hero with 1 blaster
-        ClearWeapons();
-        weapons[0].SetType(WeaponType.blaster);
         if (S == null)
         {
             S = this; // Set the Singleton
@@ -57,9 +46,9 @@ private GameObject lastTriggerGo = null;
         ClearWeapons();
         weapons[0].SetType(WeaponType.blaster);
     }
-	
-	// Update is called once per frame
-	void Update()
+
+    // Update is called once per frame
+    void Update()
     {
         // Pull in information from the Input class
         float xAxis = Input.GetAxis("Horizontal");
@@ -71,49 +60,22 @@ private GameObject lastTriggerGo = null;
         pos.y += yAxis * speed * Time.deltaTime;
         transform.position = pos;
 
-        bounds.center = transform.position; // 1
-                                            // Keep the ship constrained to the screen bounds
-        Vector3 off = Utils.ScreenBoundsCheck(bounds, BoundsTest.onScreen); // 2
-        if (off != Vector3.zero)
-        { // 3
-            pos -= off;
-            transform.position = pos;
-        }
-
-
-
         // Rotate the ship to make it feel more dynamic
         transform.rotation = Quaternion.Euler(yAxis * pitchMult, xAxis * rollMult, 0);
-
-        // Use the fireDelegate to fire Weapons
-        // First, make sure the Axis("Jump") button is pressed
-        // Then ensure that fireDelegate isn't null to avoid an error
-        if (Input.GetAxis("Jump") == 1 && fireDelegate != null)
-        { // 1
-            fireDelegate();
-        }
-
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {                          
-            TempFire();                                                   
-        }
 
         //TODO: Replace the TempFire call with the weapon delgate call
         // Use the fireDelegate to fire Weapons
         // First, make sure the button is pressed: Axis("Jump")
         // Then ensure that fireDelegate isn't null to avoid an error
-
-
-
+        if (Input.GetAxis("Jump") == 1 && fireDelegate != null)
+        {
+            fireDelegate();
+        }
     }
-
-
-
 
     //TODO: replace or comment out later
     void TempFire()
-    {                                                      
+    {
         GameObject projGO = Instantiate<GameObject>(projectilePrefab);
 
         projGO.transform.position = transform.position;
@@ -121,7 +83,7 @@ private GameObject lastTriggerGo = null;
 
         //        rigidB.velocity = Vector3.up * projectileSpeed;        
 
-        Projectile proj = projGO.GetComponent<Projectile>();  
+        Projectile proj = projGO.GetComponent<Projectile>();
 
         proj.type = WeaponType.blaster;
         float tSpeed = Main.GetWeaponDefinition(proj.type).velocity;
@@ -135,8 +97,6 @@ private GameObject lastTriggerGo = null;
         GameObject go = rootT.gameObject;
         print("Triggered: " + go.name);
 
-
-
         // Make sure it's not the same triggering go as last time
         if (go == lastTriggerGo)
         {
@@ -144,7 +104,7 @@ private GameObject lastTriggerGo = null;
         }
         lastTriggerGo = go;
 
-        if(go.tag == "Enemy")
+        if (go.tag == "Enemy")
         {
             shieldLevel--;
             Destroy(go);
@@ -173,10 +133,10 @@ private GameObject lastTriggerGo = null;
                 break;
 
             default:
-                if(pu.type == weapons[0].type)
+                if (pu.type == weapons[0].type)
                 {
                     Weapon w = GetEmptyWeaponSlot();
-                    if(w != null)
+                    if (w != null)
                     {
                         // Set it to pu.type
                         w.SetType(pu.type);
@@ -214,7 +174,7 @@ private GameObject lastTriggerGo = null;
 
     Weapon GetEmptyWeaponSlot()
     {
-        for (int i=0; i<weapons.Length; i++)
+        for (int i = 0; i < weapons.Length; i++)
         {
             if (weapons[i].type == WeaponType.none)
             {
