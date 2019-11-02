@@ -20,7 +20,16 @@ public class Main : MonoBehaviour {
     };
 
     private BoundsCheck bndCheck;
+    private WeaponType[] activeWeaponTypes;
 
+    void Start()
+    {
+        activeWeaponTypes = new WeaponType[weaponDefinitions.Length];
+        for (int i = 0; i < weaponDefinitions.Length; i++)
+        {
+            activeWeaponTypes[i] = weaponDefinitions[i].type;
+        }
+    }
     public void ShipDestroyed( Enemy e)
     {
         // Potentially generate a PowerUp
@@ -57,6 +66,8 @@ public class Main : MonoBehaviour {
             WEAP_DICT[def.type] = def;
         }
     }
+
+
 
     public void SpawnEnemy()
     {

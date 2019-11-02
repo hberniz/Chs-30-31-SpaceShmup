@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Hero : MonoBehaviour {
     static public Hero S; // Singleton
-
+    private Bounds bounds;
     [Header("Set in Inspector")]
     // These fields control the movement of the ship
     public float speed = 30;
@@ -19,16 +19,30 @@ public class Hero : MonoBehaviour {
     [SerializeField]
     public float _shieldLevel = 1;
 
-    // This variable holds a reference to the last triggering GameObject
-    private GameObject lastTriggerGo = null;
+
+// This variable holds a reference to the last triggering GameObject
+private GameObject lastTriggerGo = null;
 
 
     //TODO: Add function delegate declaration
 
+    // Declare a new delegate type WeaponFireDelegate
+    public delegate void WeaponFireDelegate();
+    // Create a WeaponFireDelegate field named fireDelegate.
+    public WeaponFireDelegate fireDelegate;
 
-
-	void Start()
+    void Awake()
     {
+        S = this; // Set the Singleton
+        bounds = Utils.CombineBoundsOfChildren(this.gameObject);
+      
+    }
+
+    void Start()
+    {
+        // Reset the weapons to start _Hero with 1 blaster
+        ClearWeapons();
+        weapons[0].SetType(WeaponType.blaster);
         if (S == null)
         {
             S = this; // Set the Singleton
@@ -57,8 +71,27 @@ public class Hero : MonoBehaviour {
         pos.y += yAxis * speed * Time.deltaTime;
         transform.position = pos;
 
+        bounds.center = transform.position; // 1
+                                            // Keep the ship constrained to the screen bounds
+        Vector3 off = Utils.ScreenBoundsCheck(bounds, BoundsTest.onScreen); // 2
+        if (off != Vector3.zero)
+        { // 3
+            pos -= off;
+            transform.position = pos;
+        }
+
+
+
         // Rotate the ship to make it feel more dynamic
         transform.rotation = Quaternion.Euler(yAxis * pitchMult, xAxis * rollMult, 0);
+
+        // Use the fireDelegate to fire Weapons
+        // First, make sure the Axis("Jump") button is pressed
+        // Then ensure that fireDelegate isn't null to avoid an error
+        if (Input.GetAxis("Jump") == 1 && fireDelegate != null)
+        { // 1
+            fireDelegate();
+        }
 
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -101,6 +134,8 @@ public class Hero : MonoBehaviour {
         Transform rootT = other.gameObject.transform.root;
         GameObject go = rootT.gameObject;
         print("Triggered: " + go.name);
+
+
 
         // Make sure it's not the same triggering go as last time
         if (go == lastTriggerGo)

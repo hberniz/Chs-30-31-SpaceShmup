@@ -23,6 +23,7 @@ public class Enemy : MonoBehaviour {
 
     private void Awake()
     {
+        InvokeRepeating("CheckOffscreen", 0f, 2f);
         bndCheck = GetComponent<BoundsCheck>();
         // Get materials and colors for this GameObject and its children
         materials = Utils.GetAllMaterials(gameObject);
@@ -32,6 +33,34 @@ public class Enemy : MonoBehaviour {
             originalColors[i] = materials[i].color;
         }
     }
+
+    void CheckOffscreen()
+    {
+        // If bounds are still their default value...
+        if (bounds.size == Vector3.zero)
+        {
+            // then set them
+            bounds = Utils.CombineBoundsOfChildren(this.gameObject);
+            // Also find the diff between bounds.center & transform.position
+            boundsCenterOffset = bounds.center - transform.position;
+        }
+        // Every time, update the bounds to the current position
+        bounds.center = transform.position + boundsCenterOffset;
+        // Check to see whether the bounds are completely offscreen
+        Vector3 off = Utils.ScreenBoundsCheck(bounds, BoundsTest.offScreen);
+        if (off != Vector3.zero)
+        {
+            // If this enemy has gone off the bottom edge of the screen
+            if (off.y < 0)
+            {
+                // then destroy it
+                Destroy(this.gameObject);
+            }
+        }
+    }
+
+
+
 
     // This is a property: A method that acts like a field
     public Vector3 pos

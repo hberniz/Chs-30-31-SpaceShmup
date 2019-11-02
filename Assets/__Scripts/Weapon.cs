@@ -46,12 +46,17 @@ public class Weapon : MonoBehaviour {
     public GameObject collar;
     public float lastShotTime; // Time last shot was fired
     private Renderer collarRend;
+    private float lastShot;
 
-    private void Start()
+    void Awake()
     {
         collar = transform.Find("Collar").gameObject;
         collarRend = collar.GetComponent<Renderer>();
+    }
 
+
+        private void Start()
+        { 
         // Call SetType() for the default _type of WeaponType.none
         SetType(_type);
 
@@ -102,12 +107,52 @@ public class Weapon : MonoBehaviour {
     public void Fire()
     {
         //TODO: Implement Fire
+        // If this.gameObject is inactive, return
+        if (!gameObject.activeInHierarchy) return;
+        // If it hasn't been enough time between shots, return
+        if (Time.time - lastShot < def.delayBetweenShots)
+        {
+            return;
+        }
+        Projectile p;
+        switch (type)
+        {
+            case WeaponType.blaster:
+                p = MakeProjectile();
+                p.GetComponent<Rigidbody>().velocity = Vector3.up * def.velocity;
+                break;
+            case WeaponType.spread:
+                p = MakeProjectile();
+                p.GetComponent<Rigidbody>().velocity = Vector3.up * def.velocity;
+                p = MakeProjectile();
+                p.GetComponent<Rigidbody>().velocity = new Vector3(-.2f, 0.9f, 0) * def.velocity;
+                p = MakeProjectile();
+                p.GetComponent<Rigidbody>().velocity = new Vector3(.2f, 0.9f, 0) * def.velocity;
+                break;
+        }
 
     }
 
     public Projectile MakeProjectile()
     {
         //TODO: Implement MakeProjectile
+        GameObject go = Instantiate(def.projectilePrefab) as GameObject;
+        if (transform.parent.gameObject.tag == "Hero")
+        {
+            go.tag = "ProjectileHero";
+            go.layer = LayerMask.NameToLayer("ProjectileHero");
+        }
+        else
+        {
+            go.tag = "ProjectileEnemy";
+            go.layer = LayerMask.NameToLayer("ProjectileEnemy");
+        }
+        go.transform.position = collar.transform.position;
+        go.transform.parent = PROJECTILE_ANCHOR;
+        Projectile p = go.GetComponent<Projectile>();
+        p.type = type;
+        lastShot = Time.time;
+        return (p);
 
 
     }
